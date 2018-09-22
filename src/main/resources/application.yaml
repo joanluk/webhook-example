@@ -1,0 +1,47 @@
+server:
+  port: 8080
+
+
+#JPA Configuration
+spring:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  application:
+    name: webhook-service
+
+  profiles:
+    active: local
+logging.level.org.emaginalabs: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+
+---
+
+
+spring:
+  profiles: container
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL57Dialect
+    hibernate:
+      ddl-auto: update
+      use-new-id-generator-mappings: true
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/webhook?useSSL=false
+    username: root
+    password: secret
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging.level.org.emaginalabs: DEBUG
