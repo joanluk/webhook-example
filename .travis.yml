@@ -1,0 +1,9 @@
+language: java
+
+install: echo "My projects will be configurable in an awesomical way ;)."
+
+# don't just run the tests, also run Findbugs and friends.
+script: gradle clean build
+
+jdk:
+- oraclejdk8

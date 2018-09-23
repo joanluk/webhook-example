@@ -30,7 +30,7 @@ En resumen, cuando se requiera notificaciones en tiempo real de eventos, un Webh
 - Mysql
 
 
-== Configuración, consutrcción  y ejecutar el proyecto
+== Configuración, construcción  y ejecutar el proyecto
 
 Toda la configuración del proyecto se encuentra en el fichero
 
