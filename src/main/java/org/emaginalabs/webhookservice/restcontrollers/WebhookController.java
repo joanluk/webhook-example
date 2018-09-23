@@ -34,10 +34,10 @@ public class WebhookController implements ApplicationEventPublisherAware {
      */
     @PostMapping
     @ApiOperation(value = "Register nuew application")
-    public Long registerNewApplication(@RequestBody Application requestApplication) {
-        validateParam(requestApplication.getUrl(), "url");
+    public Long registerNewApplication(@RequestParam(required = true) String url, @RequestParam(required = true) String name) {
 
-        Application application = applicationRepository.save(requestApplication);
+        Application applicationRequest = Application.builder().name(name).url(url).online(true).build();
+        Application application = applicationRepository.save(applicationRequest);
 
         log.debug("Received Application {}", application.getUrl());
 

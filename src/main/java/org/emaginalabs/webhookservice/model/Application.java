@@ -2,6 +2,7 @@ package org.emaginalabs.webhookservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -10,6 +11,7 @@ import java.util.List;
 @Entity
 @Data
 @AllArgsConstructor
+@Builder
 public class Application {
 
     @Id

@@ -52,4 +52,8 @@ public class Message {
     }
 
 
+    @Override
+    public String toString() {
+        return String.format("Message[id=%d, messageBody='%s', contentType='%s']", id, messageBody, contentType);
+    }
 }

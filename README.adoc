@@ -1,0 +1,322 @@
+= Webhook con Spring Boot
+
+Este proyecto implementa un Webhook  usando Spring Boot 2.
+
+Pero antes de nada vamos a explicar qué es Webhook y para qué puede ser útil.
+
+
+== Webhook
+
+Desde hace ya algún tiempo se ha hecho muy conocido y útil el uso de API´s. Un API Es una interfaz de servicio realtime que permite a los desarrolladores y aplicaciones de terceros tomar data de un determinado sitio en internet.
+
+Una API es una excelente forma de comunicar datos entre aplicaciones separadas. Pero, ¿qué ocurre cuando en entornos realtime es necesario  notificar cambios en determinado evento o elemento en otra aplicación? En este caso, una API sería extremadamente ineficiente. En su lugar, necesitas utilizar un Webhook.
+
+
+Un Webhook es una mecanismo que permite ser notificado cuando un evento ha ocurrido en tu aplicacion o la de un tercero. Es básicamente una solicitud POST que se envía a una URL específica. Esa URL está configurada para recibir el cuerpo de la solicitud POST y procesarla de alguna manera.
+
+Por tanto se podría decir que un  API se utiliza para hacer preguntas directas y síncronas y un Webhook se utiliza para notificar cuando se producen ciertos eventos. En lugar de preguntar constantemente si algo ha cambiado, un webhook puede activarse y notificarnos automaticamente apenas se produzca el evento.
+
+
+En resumen, cuando se requiera notificaciones en tiempo real de eventos, un Webhook es realmente tu mejor opción. Es extraño que los Webhooks no tengan el mismo tipo de amor que las APIs. Siempre escuchamos hablar sobre las APIs, pero muy poco de las Webhooks a pesar de sus enormes ventajas y facilidades.
+
+== Requisitos
+
+- Java 8
+- Gradle
+- Spring Boot 2
+- Docker
+- Mysql
+
+
+== Configuración, consutrcción  y ejecutar el proyecto
+
+Toda la configuración del proyecto se encuentra en el fichero
+
+.src/main/resources/application.yaml
+[source,java]
+----
+server:
+  port: 8080
+
+
+#JPA Configuration
+spring:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  application:
+    name: webhook-service
+
+  profiles:
+    active: local
+logging.level.org.emaginalabs: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+
+---
+
+
+spring:
+  profiles: container
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL57Dialect
+    hibernate:
+      ddl-auto: update
+      use-new-id-generator-mappings: true
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/webhook?useSSL=false
+    username: root
+    password: secret
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging.level.org.emaginalabs: DEBUG
+----
+
+
+El ejemplo tiene dos configuraciones de ejecución. Si se ejecuta como una aplicación standalone local, usará H2 como base de datos en memoria. En caso que se ejecute en modo contenedor, se utilizará una base de datos MySql
+
+
+Para construir un proyecto simplemente es necesario ejecutar el siguiente comando gradle
+
+	gradle build
+
+
+A continuación para ejecutar el ejemplo:
+
+	java .jar webhook-service-1.0.0-SNAPSHOT.jar
+
+[source, xml]
+----
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v2.0.5.RELEASE)
+
+2018-09-23 11:39:41.640  INFO 93288 --- [           main] o.e.w.WebhookServiceApplication          : Starting WebhookServiceApplication on MacBook-Pro.home with PID 93288 (/Users/jose/desarrollo/proyectos/webhookservice/webhook-service/build/libs/webhook-service-1.0.0-SNAPSHOT.jar started by jose in /Users/jose/desarrollo/proyectos/webhookservice/webhook-service/build/libs)
+2018-09-23 11:39:41.646 DEBUG 93288 --- [           main] o.e.w.WebhookServiceApplication          : Running with Spring Boot v2.0.5.RELEASE, Spring v5.0.9.RELEASE
+2018-09-23 11:39:41.648  INFO 93288 --- [           main] o.e.w.WebhookServiceApplication          : The following profiles are active: local
+2018-09-23 11:39:41.763  INFO 93288 --- [           main] ConfigServletWebServerApplicationContext : Refreshing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@6debcae2: startup date [Sun Sep 23 11:39:41 CEST 2018]; root of context hierarchy
+2018-09-23 11:39:43.807  INFO 93288 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'webhookServiceApplication' of type [org.emaginalabs.webhookservice.WebhookServiceApplication$$EnhancerBySpringCGLIB$$9ab22135] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2018-09-23 11:39:43.817  INFO 93288 --- [           main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService
+2018-09-23 11:39:44.017  INFO 93288 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$186054ea] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2018-09-23 11:39:44.815  INFO 93288 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2018-09-23 11:39:44.860  INFO 93288 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2018-09-23 11:39:44.861  INFO 93288 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet Engine: Apache Tomcat/8.5.34
+2018-09-23 11:39:44.881  INFO 93288 --- [ost-startStop-1] o.a.catalina.core.AprLifecycleListener   : The APR based Apache Tomcat Native library which allows optimal performance in production environments was not found on the java.library.path: [/Users/jose/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:.]
+2018-09-23 11:39:45.007  INFO 93288 --- [ost-startStop-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2018-09-23 11:39:45.007  INFO 93288 --- [ost-startStop-1] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 3246 ms
+2018-09-23 11:39:45.947  INFO 93288 --- [ost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'characterEncodingFilter' to: [/*]
+2018-09-23 11:39:45.948  INFO 93288 --- [ost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'webMvcMetricsFilter' to: [/*]
+2018-09-23 11:39:45.948  INFO 93288 --- [ost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'hiddenHttpMethodFilter' to: [/*]
+2018-09-23 11:39:45.948  INFO 93288 --- [ost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'httpPutFormContentFilter' to: [/*]
+2018-09-23 11:39:45.948  INFO 93288 --- [ost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'requestContextFilter' to: [/*]
+2018-09-23 11:39:45.948  INFO 93288 --- [ost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'httpTraceFilter' to: [/*]
+2018-09-23 11:39:45.948  INFO 93288 --- [ost-startStop-1] o.s.b.w.servlet.ServletRegistrationBean  : Servlet dispatcherServlet mapped to [/]
+2018-09-23 11:39:46.169  INFO 93288 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2018-09-23 11:39:46.492  INFO 93288 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2018-09-23 11:39:46.550  INFO 93288 --- [           main] j.LocalContainerEntityManagerFactoryBean : Building JPA container EntityManagerFactory for persistence unit 'default'
+2018-09-23 11:39:46.582  INFO 93288 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [
+	name: default
+	...]
+2018-09-23 11:39:46.749  INFO 93288 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate Core {5.2.17.Final}
+2018-09-23 11:39:46.752  INFO 93288 --- [           main] org.hibernate.cfg.Environment            : HHH000206: hibernate.properties not found
+2018-09-23 11:39:46.837  INFO 93288 --- [           main] o.hibernate.annotations.common.Version   : HCANN000001: Hibernate Commons Annotations {5.0.1.Final}
+2018-09-23 11:39:47.132  INFO 93288 --- [           main] org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.H2Dialect
+Hibernate: create table application (id bigint not null, name varchar(255), online boolean not null, url varchar(255) not null, primary key (id))
+Hibernate: create table message (id bigint not null, content_type varchar(255) not null, message_body varchar(255) not null, timestamp timestamp not null, application_id bigint not null, primary key (id))
+Hibernate: create sequence hibernate_sequence start with 1 increment by 1
+Hibernate: alter table message add constraint FKilx4nfrunhu6u8vmhek3wnhic foreign key (application_id) references application
+2018-09-23 11:39:48.000  INFO 93288 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2018-09-23 11:39:48.387  INFO 93288 --- [           main] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
+2018-09-23 11:39:49.481  WARN 93288 --- [           main] aWebConfiguration$JpaWebMvcConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2018-09-23 11:39:49.555  INFO 93288 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/applications],methods=[POST]}" onto public java.lang.Long org.emaginalabs.webhookservice.restcontrollers.WebhookController.registerNewApplication(org.emaginalabs.webhookservice.model.Application)
+2018-09-23 11:39:49.556  INFO 93288 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/applications],methods=[GET]}" onto public java.lang.Iterable<org.emaginalabs.webhookservice.model.Application> org.emaginalabs.webhookservice.restcontrollers.WebhookController.listApplications()
+2018-09-23 11:39:49.556  INFO 93288 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/applications/{id}],methods=[DELETE]}" onto public void org.emaginalabs.webhookservice.restcontrollers.WebhookController.deleteApplication(java.lang.Long)
+2018-09-23 11:39:49.556  INFO 93288 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/applications/{id}/message],methods=[POST]}" onto public void org.emaginalabs.webhookservice.restcontrollers.WebhookController.postMessageToApplication(java.lang.Long,java.lang.String,java.lang.String)
+2018-09-23 11:39:49.560  INFO 93288 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/swagger-resources/configuration/ui]}" onto public org.springframework.http.ResponseEntity<springfox.documentation.swagger.web.UiConfiguration> springfox.documentation.swagger.web.ApiResourceController.uiConfiguration()
+2018-09-23 11:39:49.561  INFO 93288 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/swagger-resources/configuration/security]}" onto public org.springframework.http.ResponseEntity<springfox.documentation.swagger.web.SecurityConfiguration> springfox.documentation.swagger.web.ApiResourceController.securityConfiguration()
+2018-09-23 11:39:49.562  INFO 93288 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/swagger-resources]}" onto public org.springframework.http.ResponseEntity<java.util.List<springfox.documentation.swagger.web.SwaggerResource>> springfox.documentation.swagger.web.ApiResourceController.swaggerResources()
+2018-09-23 11:39:49.565  INFO 93288 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error]}" onto public org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>> org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.error(javax.servlet.http.HttpServletRequest)
+2018-09-23 11:39:49.566  INFO 93288 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error],produces=[text/html]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)
+2018-09-23 11:39:49.664  INFO 93288 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 14 endpoint(s) beneath base path '/actuator'
+2018-09-23 11:39:49.675  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/auditevents],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.676  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/beans],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.676  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/health],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.677  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/conditions],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.677  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/configprops],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.677  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/env],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.677  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/env/{toMatch}],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.678  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/info],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.678  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/loggers],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.678  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/loggers/{name}],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.679  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/loggers/{name}],methods=[POST],consumes=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.679  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/heapdump],methods=[GET],produces=[application/octet-stream]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.680  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/threaddump],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.680  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/metrics/{requiredMetricName}],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.680  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/metrics],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.680  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/scheduledtasks],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.680  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/httptrace],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.681  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator/mappings],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)
+2018-09-23 11:39:49.682  INFO 93288 --- [           main] s.b.a.e.w.s.WebMvcEndpointHandlerMapping : Mapped "{[/actuator],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}" onto protected java.util.Map<java.lang.String, java.util.Map<java.lang.String, org.springframework.boot.actuate.endpoint.web.Link>> org.springframework.boot.actuate.endpoint.web.servlet.WebMvcEndpointHandlerMapping.links(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)
+2018-09-23 11:39:49.849  INFO 93288 --- [           main] pertySourcedRequestMappingHandlerMapping : Mapped URL path [/v2/api-docs] onto method [public org.springframework.http.ResponseEntity<springfox.documentation.spring.web.json.Json> springfox.documentation.swagger2.web.Swagger2Controller.getDocumentation(java.lang.String,javax.servlet.http.HttpServletRequest)]
+2018-09-23 11:39:49.974  INFO 93288 --- [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**/favicon.ico] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2018-09-23 11:39:50.034  INFO 93288 --- [           main] s.w.s.m.m.a.RequestMappingHandlerAdapter : Looking for @ControllerAdvice: org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@6debcae2: startup date [Sun Sep 23 11:39:41 CEST 2018]; root of context hierarchy
+2018-09-23 11:39:50.107  INFO 93288 --- [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/webjars/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2018-09-23 11:39:50.107  INFO 93288 --- [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2018-09-23 11:39:50.130  INFO 93288 --- [           main] .m.m.a.ExceptionHandlerExceptionResolver : Detected @ExceptionHandler methods in restExceptionHandler
+2018-09-23 11:39:50.658  INFO 93288 --- [           main] o.s.j.e.a.AnnotationMBeanExporter        : Registering beans for JMX exposure on startup
+2018-09-23 11:39:50.660  INFO 93288 --- [           main] o.s.j.e.a.AnnotationMBeanExporter        : Bean with name 'dataSource' has been autodetected for JMX exposure
+2018-09-23 11:39:50.667  INFO 93288 --- [           main] o.s.j.e.a.AnnotationMBeanExporter        : Located MBean 'dataSource': registering with JMX server as MBean [com.zaxxer.hikari:name=dataSource,type=HikariDataSource]
+2018-09-23 11:39:50.674  INFO 93288 --- [           main] o.s.c.support.DefaultLifecycleProcessor  : Starting beans in phase 2147483647
+2018-09-23 11:39:50.675  INFO 93288 --- [           main] d.s.w.p.DocumentationPluginsBootstrapper : Context refreshed
+2018-09-23 11:39:50.703  INFO 93288 --- [           main] d.s.w.p.DocumentationPluginsBootstrapper : Found 1 custom documentation plugin(s)
+2018-09-23 11:39:50.736  INFO 93288 --- [           main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2018-09-23 11:39:50.903  INFO 93288 --- [           main] s.a.ScheduledAnnotationBeanPostProcessor : No TaskScheduler/ScheduledExecutorService bean found for scheduled processing
+2018-09-23 11:39:50.959  INFO 93288 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2018-09-23 11:39:50.964  INFO 93288 --- [           main] o.e.w.WebhookServiceApplication          : Started WebhookServiceApplication in 9.925 seconds (JVM running for 10.611)
+----
+
+
+ == Ejemplos de solicitud de peticiones
+
+ - Registro de nueva aplicación
+
+
+	curl -X POST \
+	  http://localhost:8080/applications \
+	  -H 'Content-Type: application/x-www-form-urlencoded' \
+	  -d 'url=http%3A%2F%2Fposttestserver.com%2Fpost.php%3Fdir%3Dwebok&name=test%20app'
+
+
+El servicio de registro se ha desarrollado para que pueda realizar mediante un formulario de registro
+
+
+- Listado de aplicaciones registradas
+
+	curl -v --request GET http://localhost:8080/applications
+
+
+- Borrado de una aplicación a partir de su ID
+
+	curl -v --request DELETE http://localhost:8080/applications/1
+
+- Enviar mensaje POST a una aplicación
+
+	curl -v --header "Content-type: text/pain" --request POST --data "WEBHOOK TEST" http://localhost:8080/applications/1/message
+
+
+Para consultar los servicios disponibles se puede realizar llamando a la siguiente url donde se muestran mediante Swagger:
+
+	http://localhost:8080/swagger-ui.html
+
+
+
+== Generación de las imágenes de docker
+
+=== Dockerfile
+
+La generación de las imágenes de Docker es sencillo dado que utilizando una imagen basada en openjdk no deberemos realizar ninguna configuración adicional:
+
+----
+FROM openjdk:8-jdk-alpine
+VOLUME /tmp
+ARG JAR_FILE
+ADD ${JAR_FILE} app.jar
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=container", "-jar","/app.jar"]
+----
+
+Simplemente copiamos el jar ejecutable generado y lo lanzamos con la opción java -jar como cualquier aplicación Spring Boot. Se le añade el profile `container` para indicarle que estamos en modo de ejecución CAS.
+
+Para crear la imagen docker se utiliza el plugin https://github.com/palantir/gradle-docker[palantir]
+de gradle.
+
+La configuración del plugin es realmente sencilla:
+
+[source]
+----
+docker {
+    name "joanluk/${jar.baseName}"
+    tags '1.0.0-SNAPSHOT'
+    files jar.archivePath
+    buildArgs(['JAR_FILE': "${jar.archiveName}"])
+}
+----
+
+Para crear la imagen simplemente ejecutaremos:
+
+----
+$ gradle build docker
+----
+
+Además de la generación local de la imagen el plugin también nos ofrece otras funcionalidades como la de realizar el push o realizar tags. Para más detalle revisar la documentación. En este ejemplo no se ha utilizado para nada más
+
+
+== Docker-compose
+
+En la ruta env se encuentra el fichero `docker-compose.yml` que contiene toda la configuración para arrancar el ejemplo
+
+
+----
+version: '3'
+services:
+
+  mysql:
+    image: mysql/mysql-server:5.7
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: webhook
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_HOST: '%'
+    ports:
+    - 3306:3306
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+    - 9090:8080
+
+  webhook-service:
+    image: joanluk/webhook-service:latest
+    ports:
+    - 8080:8080
+    depends_on:
+    - mysql
+----
+
+Como se observa, se han definido 3 servicios:
+
+- *Mysql* -> base de datos donde se registran las aplicaciones que solicitan webhook y los mensajes
+- *Adminer* -> utilidad por si se quiere acceder a la base de datos
+- *webhook-service* -> servicio realizado para el registro de webhooks
+
+
+Para ejecutar simplemente:
+
+----
+docker-compose up &
+----
+
+
+
+
+
+
