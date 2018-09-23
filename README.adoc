@@ -90,14 +90,16 @@ El ejemplo tiene dos configuraciones de ejecución. Si se ejecuta como una aplic
 
 Para construir un proyecto simplemente es necesario ejecutar el siguiente comando gradle
 
-	gradle build
-
+----
+gradle build
+----
 
 A continuación para ejecutar el ejemplo:
 
-	java .jar webhook-service-1.0.0-SNAPSHOT.jar
+----
+java .jar webhook-service-1.0.0-SNAPSHOT.jar
+----
 
-[source, xml]
 ----
 
   .   ____          _            __ _ _
@@ -193,9 +195,9 @@ Hibernate: alter table message add constraint FKilx4nfrunhu6u8vmhek3wnhic foreig
 ----
 
 
- == Ejemplos de solicitud de peticiones
+== Ejemplos de solicitud de peticiones
 
- - Registro de nueva aplicación
+- *Registro de nueva aplicación*
 
 
 	curl -X POST \
@@ -207,16 +209,16 @@ Hibernate: alter table message add constraint FKilx4nfrunhu6u8vmhek3wnhic foreig
 El servicio de registro se ha desarrollado para que pueda realizar mediante un formulario de registro
 
 
-- Listado de aplicaciones registradas
+- *Listado de aplicaciones registradas*
 
 	curl -v --request GET http://localhost:8080/applications
 
 
-- Borrado de una aplicación a partir de su ID
+- *Borrado de una aplicación a partir de su ID*
 
 	curl -v --request DELETE http://localhost:8080/applications/1
 
-- Enviar mensaje POST a una aplicación
+- *Enviar mensaje POST a una aplicación*
 
 	curl -v --header "Content-type: text/pain" --request POST --data "WEBHOOK TEST" http://localhost:8080/applications/1/message
 
